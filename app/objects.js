@@ -18,6 +18,52 @@ var objectsType = {
 			'hsla(33, 70%, 40%, 1)',
 			'hsla(33, 75%, 30%, 1)'
 		]
+	},
+	tv: {
+		name: 'TV',
+		art: Array(20 * 20).fill(0).concat(Array(20 * 10).fill(1)),
+		width: 20,
+		height: 10,
+		colors: [
+			'hsla(0, 0%, 20%, 1)',
+			'hsla(0, 0%, 30%, 1)'
+		]
+	},
+	bigtv: {
+		name: 'Big TV',
+		art: Array(20 * 40).fill(0).concat(Array(40 * 10).fill(1)),
+		width: 40,
+		height: 10,
+		colors: [
+			'hsla(0, 0%, 20%, 1)',
+			'hsla(0, 0%, 30%, 1)'
+		]
+	},
+	sofa: {
+		name: 'Sofa',
+		art: Array(20 * 10).fill(0).concat(
+			 	Array(20 * 30).fill(1).concat(
+			 		Array(40 * 10).fill(2))),
+		width: 40,
+		height: 10,
+		colors: [
+			'hsla(210, 50%, 20%, 0)',
+			'hsla(210, 50%, 20%, 1)',
+			'hsla(210, 50%, 30%, 1)'
+		]
+	},
+	chair: {
+		name: 'Chair',
+		art: Array(10 * 10).fill(0).concat(
+			 	Array(10 * 30).fill(1).concat(
+			 		Array(20 * 10).fill(2))),
+		width: 20,
+		height: 10,
+		colors: [
+			'hsla(33, 50%, 20%, 0)',
+			'hsla(33, 50%, 20%, 1)',
+			'hsla(33, 50%, 30%, 1)'
+		]
 	}
 };
 

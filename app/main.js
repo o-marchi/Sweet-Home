@@ -1,4 +1,17 @@
 
+Storage.prototype.setObject = function(key, value) {
+	this.setItem(key, JSON.stringify(value));
+}
+
+Storage.prototype.getObject = function(key) {
+	var value = this.getItem(key);
+	return value && JSON.parse(value);
+}
+
+Storage.prototype.removeObject = function(key) {
+	this.removeItem(key);
+}
+
 /** --------------------------------------------
  * Globals
  -------------------------------------------- */
@@ -23,7 +36,7 @@ canvas.width = w = 600;
 canvas.height = h = 400;
 
 // game elements
-objects = [];
+objects = localStorage.getObject('SweetHome') || [];
 currentObject = 'table';
 buttons = [];
 
@@ -219,16 +232,105 @@ function createObjectsButtons() {
 
 		var x = (i * 90) + 30;
 
-		backgroundCtx.fillStyle = '#aaa';
-		console.log(i * 100);
-		backgroundCtx.fillRect(x, 20, 70, 70);
-
-		backgroundCtx.fillStyle = '#000';
-		backgroundCtx.fillText(objectsType[obj].name, x + 10, 40);
-		drawObjectBackground(obj, 50, x + 10);
-
-		buttons.push(obj);
+		buttons.push({
+			hover: false,
+			obj: obj,
+			x: x,
+			y: 20,
+			w: 70,
+			h: 70
+		});
 	}
+}
+
+function createMenuButtons() {
+
+	buttons.push({
+		hover: false,
+		menu: 'save',
+		x: 30,
+		y: 110,
+		w: 70,
+		h: 70
+	}, {
+		hover: false,
+		menu: 'restart',
+		x: 120,
+		y: 110,
+		w: 70,
+		h: 70
+	});
+}
+
+function drawButtons() {
+
+	buttons.forEach(function(btn) {
+		if (btn.hover) {
+			backgroundCtx.fillStyle = '#999';
+		} else {
+			backgroundCtx.fillStyle = '#aaa';
+		}
+		backgroundCtx.fillRect(btn.x, btn.y, 70, 70);
+		backgroundCtx.fillStyle = '#000';
+
+		if (typeof btn.obj !== 'undefined') {
+			backgroundCtx.fillText(objectsType[btn.obj].name, btn.x + 10, 40);
+			drawObjectBackground(btn.obj, 50, btn.x + 10);
+		} else {
+			backgroundCtx.fillText(btn.menu, btn.x + 10, btn.y + 20);
+		}
+	});
+}
+
+function clickButtons() {
+
+	buttons.forEach(function(btn) {
+
+		if (btn.click) {
+			if (typeof btn.obj !== 'undefined') {
+				changeObject(btn.obj);
+			} else {
+				window[btn.menu]();
+			}
+		}
+
+		btn.click = false;
+	});
+}
+
+function backgroundHover(event) {
+
+	var rect = background.getBoundingClientRect(),
+		x = event.clientX - rect.left,
+		y = event.clientY - rect.top;
+
+	buttons.forEach(function(btn) {
+
+		if (
+			(x > btn.x && x < btn.x + btn.w) &&
+			(y > btn.y && y < btn.y + btn.h)
+		) {
+			btn.hover = true;
+		} else {
+			btn.hover = false;
+		}
+	});
+}
+
+function backgroundClick(event) {
+	var rect = background.getBoundingClientRect(),
+		x = event.clientX - rect.left,
+		y = event.clientY - rect.top;
+
+	buttons.forEach(function(btn) {
+
+		if (
+			(x > btn.x && x < btn.x + btn.w) &&
+			(y > btn.y && y < btn.y + btn.h)
+		) {
+			btn.click = true;
+		}
+	});
 }
 
 function drawBackground() {
@@ -248,8 +350,8 @@ function drawBackground() {
 	backgroundCtx.fillStyle = '#ddd';
 	backgroundCtx.fillRect(0, wh - (roadH + 2 + sideRoadH), ww, sideRoadH);
 
-	backgroundCtx.fillStyle = '#ccc';
-	backgroundCtx.fillRect(0, wh - (roadH + 2 + sideRoadH + 2), ww, 2);
+	backgroundCtx.fillStyle = 'hsla(0, 0%, 0%, 0.3)';
+	backgroundCtx.fillRect(0, wh - (roadH + 2 + sideRoadH + 1), ww, 1);
 
 	for (var i = 0; i < 90; i++) {
 		backgroundCtx.fillStyle = 'yellow';
@@ -270,6 +372,16 @@ function drawBackground() {
 	}
 }
 
+function save() {
+	alert('The game was saved');
+	localStorage.setObject('SweetHome', objects);
+}
+
+function restart() {
+	localStorage.removeObject('SweetHome');
+	location.reload();
+}
+
 /** --------------------------------------------
  * Update
  * ------------------------------------------ */
@@ -287,6 +399,10 @@ function update() {
 
 	// objects
 	drawObjects();
+
+	// buttons
+	drawButtons();
+	clickButtons();
 
 	// loop again
 	requestAnimationFrame(function() {
@@ -306,12 +422,20 @@ canvas.addEventListener('click', function(e) {
 	click(e);
 }, false);
 
+background.addEventListener('mousemove', function(e) {
+	backgroundHover(e);
+}, false);
+
+background.addEventListener('click', function(e) {
+	backgroundClick(e);
+}, false);
+
 backgroundCtx.font = "13px cursive";
 c.font = "13px cursive";
 
+
 drawBackground();
 createObjectsButtons();
-newObject('stove', 1, 1);
-newObject('table', 1, 3);
+createMenuButtons();
 fillGrid();
 update();
